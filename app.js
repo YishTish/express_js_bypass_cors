@@ -9,13 +9,20 @@ const path = require('path');
 
 const LISTENING_PORT = 3500;
 const REMOTE_PORT = 4300;
-const REMOTE_URL = "cvnext90.infoneto.co.il";
+const REMOTE_URL = "example.com";
 
 
 app.use(bodyParser.json());
 app.get('*', function (appReq, appRes) {
     {
-        if(appReq.url.startsWith("/guiapi")){
+/**
+    We differentiate between local and remote calls by identifying the first string in the path.
+    If we ask for /index.html, we want the local file. If we ask for /api/customers, we want the 
+    remote files. 
+    Currently, the assumption is that the remote server is also expecting that 'api' original path
+    string. 
+**/
+        if(appReq.url.startsWith("/api")){
             http.get('http://'+REMOTE_URL+appReq.url, (res) => {
                 const { statusCode } = res;
                 const contentType = res.headers['content-type'];
@@ -70,10 +77,6 @@ app.post('*', function (appReq, appRes) {
                 'Content-Type': 'application/json',
             },
         };
-
-        //const data = JSON.stringify(appReq.body);
-        // postOptions.headers['Content-Length'] = Buffer.byteLength(data);
-
 
         const postReq = http.request(postOptions, (res) => {
             const { statusCode } = res;
